@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+// In Bitcoint specification Timestamp, PrevBlockHash, and Hash are block
+// headers, which form a separate data structure, and transactions (Data in our
+// case) is a separate data structure. So we’re mixing them here for simplicity.
+
 // Block keeps block headers
 type Block struct {
 	Timestamp     int64
