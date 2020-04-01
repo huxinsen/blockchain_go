@@ -17,6 +17,19 @@ type Block struct {
 	Nonce         int
 }
 
+// HashTransactions returns a hash of the transactions in the block
+func (b *Block) HashTransactions() []byte {
+	var txHashes [][]byte
+	var txHash [32]byte
+
+	for _, tx := range b.Transactions {
+		txHashes = append(txHashes, tx.ID)
+	}
+	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{}))
+
+	return txHash[:]
+}
+
 // Serialize serializes the block
 func (b *Block) Serialize() []byte {
 	var result bytes.Buffer
@@ -30,17 +43,17 @@ func (b *Block) Serialize() []byte {
 	return result.Bytes()
 }
 
-// HashTransactions returns a hash of the transactions in the block
-func (b *Block) HashTransactions() []byte {
-	var txHashes [][]byte
-	var txHash [32]byte
+// DeserializeBlock deserializes a block
+func DeserializeBlock(d []byte) *Block {
+	var block Block
 
-	for _, tx := range b.Transactions {
-		txHashes = append(txHashes, tx.ID)
+	decoder := gob.NewDecoder(bytes.NewReader(d))
+	err := decoder.Decode(&block)
+	if err != nil {
+		log.Panic(err)
 	}
-	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{}))
 
-	return txHash[:]
+	return &block
 }
 
 // NewBlock creates and returns Block
@@ -58,17 +71,4 @@ func NewBlock(transactions []*Transaction, prevBlockHash []byte) *Block {
 // NewGenesisBlock creates and returns genesis Block
 func NewGenesisBlock(coinbase *Transaction) *Block {
 	return NewBlock([]*Transaction{coinbase}, []byte{})
-}
-
-// DeserializeBlock deserializes a block
-func DeserializeBlock(d []byte) *Block {
-	var block Block
-
-	decoder := gob.NewDecoder(bytes.NewReader(d))
-	err := decoder.Decode(&block)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return &block
 }

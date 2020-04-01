@@ -40,7 +40,7 @@ func (tx *Transaction) SetID() {
 // TXInput represents a transaction input
 type TXInput struct {
 	Txid      []byte
-	Vout      int
+	Vout      int // index of an output in the transaction
 	ScriptSig string
 }
 
@@ -67,7 +67,7 @@ func NewCoinbaseTX(to, data string) *Transaction {
 	}
 
 	txin := TXInput{[]byte{}, -1, data}
-	txout := TXOutput{subsidy, to}
+	txout := TXOutput{subsidy, to} // subsidy is the amount of reward
 	tx := Transaction{nil, []TXInput{txin}, []TXOutput{txout}}
 	tx.SetID()
 
