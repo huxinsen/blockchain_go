@@ -15,16 +15,6 @@ type Wallets struct {
 	Wallets map[string]*Wallet
 }
 
-// NewWallets creates Wallets and fills it from a file if it exists
-func NewWallets() (*Wallets, error) {
-	wallets := Wallets{}
-	wallets.Wallets = make(map[string]*Wallet)
-
-	err := wallets.LoadFromFile()
-
-	return &wallets, err
-}
-
 // CreateWallet adds a Wallet to Wallets
 func (ws *Wallets) CreateWallet() string {
 	wallet := NewWallet()
@@ -33,6 +23,11 @@ func (ws *Wallets) CreateWallet() string {
 	ws.Wallets[address] = wallet
 
 	return address
+}
+
+// GetWallet returns a Wallet by its address
+func (ws Wallets) GetWallet(address string) Wallet {
+	return *ws.Wallets[address]
 }
 
 // GetAddresses returns an array of addresses stored in the wallet file
@@ -44,11 +39,6 @@ func (ws *Wallets) GetAddresses() []string {
 	}
 
 	return addresses
-}
-
-// GetWallet returns a Wallet by its address
-func (ws Wallets) GetWallet(address string) Wallet {
-	return *ws.Wallets[address]
 }
 
 // LoadFromFile loads wallets from the file
@@ -91,4 +81,14 @@ func (ws Wallets) SaveToFile() {
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+// NewWallets creates Wallets and fills it from a file if it exists
+func NewWallets() (*Wallets, error) {
+	wallets := Wallets{}
+	wallets.Wallets = make(map[string]*Wallet)
+
+	err := wallets.LoadFromFile()
+
+	return &wallets, err
 }
