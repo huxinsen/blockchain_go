@@ -20,14 +20,6 @@ type Wallet struct {
 	PublicKey  []byte
 }
 
-// NewWallet creates and returns a Wallet
-func NewWallet() *Wallet {
-	private, public := newKeyPair()
-	wallet := Wallet{private, public}
-
-	return &wallet
-}
-
 // GetAddress returns wallet address
 func (w Wallet) GetAddress() []byte {
 	pubKeyHash := HashPubKey(w.PublicKey)
@@ -55,6 +47,14 @@ func HashPubKey(pubKey []byte) []byte {
 	return publicRIPEMD160
 }
 
+// Checksum generates a checksum for a public key
+func checksum(payload []byte) []byte {
+	firstSHA := sha256.Sum256(payload)
+	secondSHA := sha256.Sum256(firstSHA[:])
+
+	return secondSHA[:addressChecksumLen]
+}
+
 // ValidateAddress check if address if valid
 func ValidateAddress(address string) bool {
 	pubKeyHash := Base58Decode([]byte(address))
@@ -66,14 +66,6 @@ func ValidateAddress(address string) bool {
 	return bytes.Compare(actualChecksum, targetChecksum) == 0
 }
 
-// Checksum generates a checksum for a public key
-func checksum(payload []byte) []byte {
-	firstSHA := sha256.Sum256(payload)
-	secondSHA := sha256.Sum256(firstSHA[:])
-
-	return secondSHA[:addressChecksumLen]
-}
-
 func newKeyPair() (ecdsa.PrivateKey, []byte) {
 	curve := elliptic.P256()
 	private, err := ecdsa.GenerateKey(curve, rand.Reader)
@@ -83,4 +75,12 @@ func newKeyPair() (ecdsa.PrivateKey, []byte) {
 	pubKey := append(private.PublicKey.X.Bytes(), private.PublicKey.Y.Bytes()...)
 
 	return *private, pubKey
+}
+
+// NewWallet creates and returns a Wallet
+func NewWallet() *Wallet {
+	private, public := newKeyPair()
+	wallet := Wallet{private, public}
+
+	return &wallet
 }
